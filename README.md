@@ -1,15 +1,19 @@
 # Complex Network (Flight Path)
 
-## Install File
+## Install & Runnning
 
 ```
 python3 -m venv .venv
 source .venv/bin/activate
 python3 version_2.py
+```
 
+## Storing data locally
+```
 curl https: // raw.githubusercontent.com/jpatokal/openflights/master/data/routes.dat -o ./data/routes.dat
 curl https://raw.githubusercontent.com/jpatokal/openflights/master/data/airports.dat -o ./data/countries.dat
 ```
 
-
 ## Configure file
+
+Coming soon...
