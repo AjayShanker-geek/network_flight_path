@@ -181,6 +181,19 @@ sc = nx.draw_networkx_edges(network_main, nx.get_node_attributes(network_main, '
 
 # nx.draw(sc)
 # plt.draw()
+
+# Background world map
+url = "https://cloud.netlifyusercontent.com/assets/344dbf88-fdf9-42bb-adb4-46f01eedd629/0263507c-98a1-4c3e-ab72-4d4239c831a5/01-world-opt.png"
+response = urllib.request.urlopen(url)
+data = response.read()
+file = open("./data/worldmap.png", "wb")
+file.write(data)
+file.close()
+
+img = plt.imread("./data/worldmap.png")
+plt.imshow(img, zorder=0, extent=[-181, +180, -91, +98])
+
+plt.tight_layout()
 plt.show()
 # plt.savefig()
 # mpld3.fig_to_html(plt)
