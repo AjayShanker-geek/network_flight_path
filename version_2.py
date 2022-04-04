@@ -1,3 +1,4 @@
+from collections import Counter
 import urllib.request
 import csv
 import networkx as nx
@@ -7,6 +8,7 @@ import matplotlib.pyplot as plt
 # from pyvis.network import Network
 # import geopandas
 import numpy as np
+import powerlaw
 # from libpysal import weights
 
 network = nx.Graph()
@@ -101,10 +103,47 @@ for route in route_db:
 # print(nx.info(network, 507))
 # print(nx.density(network))
 
+# Degree Centrality
 degree_centrality = nx.degree_centrality(network)
 for airport, centrality_value in degree_centrality.items():
     network.nodes[airport]['degree_centrality'] = centrality_value
-print(network.nodes[507]['degree_centrality'])
+
+# Eigenvector Centrality
+eigenvector_centrality = nx.eigenvector_centrality(network)
+for airport, centrality_value in eigenvector_centrality.items():
+    network.nodes[airport]['eigenvector_centrality'] = centrality_value
+
+# Find the highest centrality
+highest_degree_airport = max(network.nodes, key=lambda index: network.nodes[index]['degree_centrality'])
+print("highest_degree_airport", network.nodes[highest_degree_airport])
+
+highest_eigenvector_airport = max(network.nodes, key=lambda index: network.nodes[index]['eigenvector_centrality'])
+print("highest_eigenvector_airport", network.nodes[highest_eigenvector_airport])
+
+# Plot degree distribution
+degree_dist = sorted((d for n, d in network.degree()), reverse=True)
+degree_dist_counts = Counter(degree_dist)
+fig, axs = plt.subplots(num=0, nrows=2, ncols=1)
+fig_x = list(degree_dist_counts.keys())
+fig_y = list(degree_dist_counts.values())
+## Normal Plot
+axs[0].plot(fig_x, fig_y, "b-", marker="o")
+axs[0].set_ylabel('Occurences')
+axs[0].set_xlabel('Degree')
+## Log Scale Plot
+axs[1].loglog(fig_x, fig_y, "b-", marker="o")
+axs[1].set_ylabel('Occurences')
+axs[1].set_xlabel('Degree')
+## Estimate Power law exponent and plot best fit line
+fit = powerlaw.Fit(degree_dist, xmax=max(fig_y))
+fit_x = np.linspace(1, max(fig_x), 10)
+fit_y = fit.power_law.xmax * pow(fit_x, -fit.power_law.alpha)
+axs[1].text(1,1, f"Best Fit Power Law Exponent:\n{fit.power_law.alpha}", fontsize=12,
+            horizontalalignment='left', verticalalignment='bottom')
+plt.plot(fit_x, fit_y, '--r')
+
+fig.tight_layout()
+
 
 # Remove NODES
 for airport, degree in list(network.degree()):
@@ -148,15 +187,15 @@ for airport in network_main.nodes():
 for route in network_main.edges():
     if (network_main[route[0]][route[1]]['airline'] == "TK"):
         network_main[route[0]][route[1]]['color'] = 'red'
-        network_main[route[0]][route[1]]['size'] = 1.5
+        network_main[route[0]][route[1]]['size'] = 1
     elif (network_main[route[0]][route[1]]['airline'] == "US"):
         network_main[route[0]][route[1]]['color'] = 'blue'
-        network_main[route[0]][route[1]]['size'] = 1.5
+        network_main[route[0]][route[1]]['size'] = 1
     else:
-        network_main[route[0]][route[1]]['color'] = 'grey'
-        network_main[route[0]][route[1]]['size'] = 0.2
+        network_main[route[0]][route[1]]['color'] = 'black'
+        network_main[route[0]][route[1]]['size'] = 1
 
-
+plt.figure(1)
 nx.draw_networkx_nodes(network_main, nx.get_node_attributes(network_main, 'coordinates'), node_shape='.',
                        node_size=[importance for importance in nx.get_node_attributes(
                            network_main, 'importance').values()],
