@@ -138,6 +138,7 @@ print("highest_eigenvector_airport", network.nodes[highest_eigenvector_airport])
 
 # Plot degree distribution
 degree_dist = sorted((d for n, d in network.degree()), reverse=True)
+degree_dist = list(filter(lambda num: num != 0, degree_dist))
 degree_dist_counts = Counter(degree_dist)
 fig, axs = plt.subplots(num=0, nrows=2, ncols=1)
 fig_x = list(degree_dist_counts.keys())
@@ -151,9 +152,13 @@ axs[1].loglog(fig_x, fig_y, "b-", marker="o")
 axs[1].set_ylabel('Occurences')
 axs[1].set_xlabel('Degree')
 ## Estimate Power law exponent and plot best fit line
-fit = powerlaw.Fit(degree_dist, xmax=max(fig_y))
+fit = powerlaw.Fit(degree_dist, xmax=max(fig_y), discrete=True)
 fit_x = np.linspace(1, max(fig_x), 10)
-fit_y = fit.power_law.xmax * pow(fit_x, -fit.power_law.alpha)
+A1 = fit.power_law.xmax
+A2 = 1 / pow(max(fig_x), -fit.power_law.alpha)
+A = (A1*0.9 + A2*0.1)
+
+fit_y = A * pow(fit_x, -fit.power_law.alpha)
 axs[1].text(1,1, f"Best Fit Power Law Exponent:\n{fit.power_law.alpha}", fontsize=12,
             horizontalalignment='left', verticalalignment='bottom')
 plt.plot(fit_x, fit_y, '--r')
