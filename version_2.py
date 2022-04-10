@@ -96,13 +96,25 @@ for airport in airport_db:
                      daylight=airport[10], timezone=airport[11],
                      type=airport[12], source=airport[13])
 
+removed = 0
 for route in route_db:
     if route['src_airport_id'] in network.nodes() and route['dest_airport_id'] in network.nodes:
+
+        # Skip if src and dest are of the same country
+        if network.nodes[route['src_airport_id']]['country'] == network.nodes[route['dest_airport_id']]['country']:
+            removed += 1
+            continue
+        else:
+            print(network.nodes[route['src_airport_id']]['country'], network.nodes[route['dest_airport_id']]['country'])
+
         network.add_edge(route['src_airport_id'], route['dest_airport_id'],
                          airline=route['airline'],
                          airline_id=route['airline_id'],
                          stops=route['stops'],
                          equipment=route['equipment'])
+
+print("Total Domestics Flights Removed : ", removed)
+
 
 # print(nx.info(network, 507))
 # print(nx.density(network))
