@@ -67,15 +67,17 @@ f = open("./data/routes_db.dat", encoding="utf8")
 route_db = []
 errors = 0
 for route in csv.reader(f, delimiter=','):
-    current_record = []
+    current_record = {}
     try:
-        current_record.append(route[0])
-        current_record.append(int(route[1]))
-        current_record.append(int(route[3]))
-        current_record.append(int(route[5]))
-        current_record.append(int(route[7]))
-        current_record.append(route[8])
-
+        current_record['airline'] = route[0]
+        current_record['airline_id'] = int(route[1])
+        current_record['src_airport'] = route[2]
+        current_record['src_airport_id'] = int(route[3])
+        current_record['dest_airport'] = route[4]
+        current_record['dest_airport_id'] = int(route[5])
+        current_record['codeshare'] = route[6]
+        current_record['stops'] = int(route[7])
+        current_record['equipment'] = route[8]
     except:
         errors += 1
     else:
@@ -95,10 +97,12 @@ for airport in airport_db:
                      type=airport[12], source=airport[13])
 
 for route in route_db:
-    if route[2] in network.nodes() and route[3] in network.nodes:
-        network.add_edge(route[2], route[3], airline=route[0],
-                         airline_id=route[1], stops=route[4],
-                         equipment=route[5])
+    if route['src_airport_id'] in network.nodes() and route['dest_airport_id'] in network.nodes:
+        network.add_edge(route['src_airport_id'], route['dest_airport_id'],
+                         airline=route['airline'],
+                         airline_id=route['airline_id'],
+                         stops=route['stops'],
+                         equipment=route['equipment'])
 
 # print(nx.info(network, 507))
 # print(nx.density(network))
