@@ -115,6 +115,10 @@ for route in route_db:
 
 print("Total Domestics Flights Removed : ", removed)
 
+# Remove Empty NODES
+for airport, degree in list(network.degree()):
+    if degree == 0:
+        network.remove_node(airport)
 
 # print(nx.info(network, 507))
 # print(nx.density(network))
@@ -164,12 +168,6 @@ axs[1].text(1,1, f"Best Fit Power Law Exponent:\n{fit.power_law.alpha}", fontsiz
 plt.plot(fit_x, fit_y, '--r')
 
 fig.tight_layout()
-
-
-# Remove NODES
-for airport, degree in list(network.degree()):
-    if degree == 0:
-        network.remove_node(airport)
 
 # Vis
 main_subgraph = max(nx.connected_components(network), key=len)
