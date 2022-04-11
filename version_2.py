@@ -154,7 +154,7 @@ axs[1].loglog(fig_x, fig_y, "b-", marker="o")
 axs[1].set_ylabel('Occurences')
 axs[1].set_xlabel('Degree')
 ## Estimate Power law exponent and plot best fit line
-fit = powerlaw.Fit(degree_dist, xmax=max(fig_y), discrete=True)
+fit = powerlaw.Fit(degree_dist, xmax=max(fig_y), xmin=min(fig_y), discrete=True)
 fit_x = np.linspace(1, max(fig_x), 10)
 A1 = fit.power_law.xmax
 A2 = 1 / pow(max(fig_x), -fit.power_law.alpha)
