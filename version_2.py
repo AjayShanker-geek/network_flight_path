@@ -104,8 +104,6 @@ for route in route_db:
         if network.nodes[route['src_airport_id']]['country'] == network.nodes[route['dest_airport_id']]['country']:
             removed += 1
             continue
-        else:
-            print(network.nodes[route['src_airport_id']]['country'], network.nodes[route['dest_airport_id']]['country'])
 
         network.add_edge(route['src_airport_id'], route['dest_airport_id'],
                          airline=route['airline'],
