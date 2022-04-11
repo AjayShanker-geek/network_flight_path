@@ -121,22 +121,74 @@ for airport, degree in list(network.degree()):
 # print(nx.info(network, 507))
 # print(nx.density(network))
 
+## *Note: These calculations may take a long time to complete
+
+# Degree
+print("Calculating Degree")
+degree_dist = network.degree()
+for airport, value in degree_dist:
+    network.nodes[airport]['degree'] = value
+
 # Degree Centrality
+print("Calculating Degree Centrality")
 degree_centrality = nx.degree_centrality(network)
 for airport, centrality_value in degree_centrality.items():
     network.nodes[airport]['degree_centrality'] = centrality_value
 
+# Closeness Centrality*
+print("Calculating Closeness Centrality")
+closeness_centrality = nx.closeness_centrality(network)
+for airport, centrality_value in closeness_centrality.items():
+    network.nodes[airport]['closeness_centrality'] = centrality_value
+
+# Betweenness Centrality*
+print("Calculating Betweenness Centrality")
+betweenness_centrality = nx.betweenness_centrality(network, k=network.number_of_nodes())
+for airport, centrality_value in betweenness_centrality.items():
+    network.nodes[airport]['betweenness_centrality'] = centrality_value
+
 # Eigenvector Centrality
+print("Calculating Eigenvector Centrality")
 eigenvector_centrality = nx.eigenvector_centrality(network)
 for airport, centrality_value in eigenvector_centrality.items():
     network.nodes[airport]['eigenvector_centrality'] = centrality_value
 
-# Find the highest centrality
-highest_degree_airport = max(network.nodes, key=lambda index: network.nodes[index]['degree_centrality'])
-print("highest_degree_airport", network.nodes[highest_degree_airport])
+print()
 
-highest_eigenvector_airport = max(network.nodes, key=lambda index: network.nodes[index]['eigenvector_centrality'])
-print("highest_eigenvector_airport", network.nodes[highest_eigenvector_airport])
+# Number of hubs to be removed later
+highest_N = 20
+
+# Find the nodes with the highest centrality measures
+def find_nodes_with_highest_centrality(N, centrality_name):
+    sorted_index = sorted(network.nodes, key=lambda index: network.nodes[index]['degree_centrality'], reverse=True)
+    nodes = list(map(lambda i: network.nodes[i], sorted_index[:N]))
+    return nodes
+# Print a list of each of the top centralities
+list_of_centralities = ['degree', 'degree_centrality', 'closeness_centrality', 'betweenness_centrality', 'eigenvector_centrality']
+for centrality_name in list_of_centralities:
+    print(f"Highest {centrality_name}:")
+    for node in find_nodes_with_highest_centrality(highest_N, centrality_name):
+        print(" ", node['name'], node['city'], node['country'], node[centrality_name], sep=', ')
+    print()
+
+# Attack the network by removing the top hubs
+print(f"Before removal, there are {network.number_of_nodes()} nodes")
+target_centrality_name = 'degree'
+removed = 0
+for node in find_nodes_with_highest_centrality(highest_N, target_centrality_name):
+    network.remove_node(node['id'])
+    removed += 1
+
+    # Calculate power law for each iteration
+    degree_dist = sorted((d for n, d in network.degree()), reverse=True)
+    degree_dist = list(filter(lambda num: num != 0, degree_dist))
+    degree_dist_counts = Counter(degree_dist)
+    fig_x = list(degree_dist_counts.keys())
+    fig_y = list(degree_dist_counts.values())
+    fit = powerlaw.Fit(degree_dist, xmax=max(fig_y), xmin=min(fig_y), discrete=True, verbose=False)
+    print(f"Power Law Exponent after {removed} removed: {fit.power_law.alpha}")
+
+print(f"Removed total {highest_N} nodes based on {target_centrality_name}")
 
 # Plot degree distribution
 degree_dist = sorted((d for n, d in network.degree()), reverse=True)
