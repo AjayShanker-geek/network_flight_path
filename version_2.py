@@ -156,7 +156,7 @@ for airport, centrality_value in eigenvector_centrality.items():
 print()
 
 # Number of hubs to be removed later
-highest_N = 20
+highest_N = 300
 
 # Find the nodes with the highest centrality measures
 def find_nodes_with_highest_centrality(N, centrality_name):
@@ -186,7 +186,18 @@ for node in find_nodes_with_highest_centrality(highest_N, target_centrality_name
     fig_x = list(degree_dist_counts.keys())
     fig_y = list(degree_dist_counts.values())
     fit = powerlaw.Fit(degree_dist, xmax=max(fig_y), xmin=min(fig_y), discrete=True, verbose=False)
-    print(f"Power Law Exponent after {removed} removed: {fit.power_law.alpha}")
+
+    print(f"Power Law Exponent after {removed} removed: {fit.power_law.alpha}", end="")
+
+    # Calculate shortest path for largest component only
+    if (removed % 3 == 1):
+        largest_connected_component = max(nx.connected_components(network), key=len)
+        largest_connected_subgraph = network.subgraph(largest_connected_component)
+        shortest_pathlength = nx.average_shortest_path_length(largest_connected_subgraph)
+        print(f" | largest component count: {len(largest_connected_component)} | average shortest path length: {shortest_pathlength} ", end="")
+
+    print()
+
 
 print(f"Removed total {highest_N} nodes based on {target_centrality_name}")
 
